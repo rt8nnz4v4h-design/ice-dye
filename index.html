@@ -679,11 +679,13 @@ function spawnDrop(ice) {
       if (dd < bd) { bd = dd; best = d; }
     }
     if (best) {
-      const share = 0.0035 + 0.0080 * Math.random();
-      amt = best.amt * share;
+      // 每滴只带走固定的一点点染料，撒多少就只够染多少，用完即止
+      const take = Math.min(best.amt, 0.9 + Math.random() * 1.7);
+      const share = best.amt > 1e-6 ? take / best.amt : 0;
+      amt = take;
       cr = best.cr * share; cg = best.cg * share; cb = best.cb * share;
-      best.amt -= amt; best.cr -= cr; best.cg -= cg; best.cb -= cb;
-      ice.cAmt -= amt;
+      best.amt -= take; best.cr -= cr; best.cg -= cg; best.cb -= cb;
+      ice.cAmt -= take;
       ice.cr -= cr; ice.cg -= cg; ice.cb -= cb;
     }
   }
@@ -781,7 +783,7 @@ function dabDye(sx, sy, strength) {
   // 撒在冰上 → 记在冰面这一处，随融水一起下去
   for (const ice of ices) {
     if (ice.vol <= 0.05 || !ice.hit(sx, sy)) continue;
-    const amt = strength * 220;
+    const amt = strength * 70;
     const cr = dye.ar * dye.depth * amt;
     const cg = dye.ag * dye.depth * amt;
     const cb = dye.ab * dye.depth * amt;
